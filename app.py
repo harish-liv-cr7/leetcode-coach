@@ -4,6 +4,7 @@ import openai
 import os
 from utils.gpt_handler import generate_hints_and_review
 
+
 # Load environment variables
 load_dotenv()
 
@@ -67,5 +68,3 @@ def health_check():
     """Health check endpoint to verify the service is running."""
     return jsonify({"status": "healthy", "message": "LeetCode Coach API is running"}), 200
 
-if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5001)
