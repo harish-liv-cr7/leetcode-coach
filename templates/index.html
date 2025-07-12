@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LeetCode Coach - AI-Powered Code Analysis</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 2rem;
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px 15px 0 0 !important;
+            border: none;
+            padding: 1.5rem;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+
+        textarea.form-control {
+            font-family: 'Courier New', monospace;
+            line-height: 1.4;
+            min-height: 200px;
+            resize: vertical;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            padding: 0.75rem 2rem;
+            font-weight: 600;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .spinner-border {
+            color: #667eea;
+        }
+
+        .response-section {
+            display: none;
+        }
+
+        .response-item {
+            margin-bottom: 1.5rem;
+            padding: 1.5rem;
+            border-radius: 10px;
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+        }
+
+        .response-item h4 {
+            color: #2c3e50;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .hints-list, .test-cases-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .hints-list li {
+            background: white;
+            margin: 0.75rem 0;
+            padding: 1rem;
+            border-radius: 8px;
+            border-left: 3px solid #28a745;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .test-cases-list li {
+            background: white;
+            margin: 0.75rem 0;
+            padding: 1rem;
+            border-radius: 8px;
+            border-left: 3px solid #ffc107;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .alert {
+            border-radius: 10px;
+            border: none;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container py-5">
+        <div class="header">
+            <h1>LeetCode Coach</h1>
+            <p>AI-Powered Code Analysis and Guidance</p>
+        </div>
+
+        <div class="row">
+            <!-- Input Section -->
+            <div class="col-lg-6 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="mb-0">Submit Your Solution</h3>
+                    </div>
+                    <div class="card-body">
+                        <form id="analysisForm">
+                            <div class="mb-3">
+                                <label for="problemTitle" class="form-label fw-bold">LeetCode Problem Title:</label>
+                                <input type="text" class="form-control" id="problemTitle" name="problem_title" 
+                                       placeholder="e.g., Two Sum, Valid Parentheses, etc." required>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label for="userCode" class="form-label fw-bold">Your Solution Code:</label>
+                                <textarea class="form-control" id="userCode" name="user_code" 
+                                          placeholder="Paste your solution code here..." required></textarea>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary w-100" id="submitBtn">
+                                <i class="bi bi-robot me-2"></i>Analyze Code
+                            </button>
+                        </form>
+                        
+                        <!-- Loading Spinner -->
+                        <div class="text-center mt-3" id="loading" style="display: none;">
+                            <div class="spinner-border" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p class="mt-2 text-muted">Analyzing your code with AI...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Output Section -->
+            <div class="col-lg-6 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="mb-0">AI Analysis Results</h3>
+                    </div>
+                    <div class="card-body">
+                        <div id="responseSection" class="response-section">
+                            <div class="response-item">
+                                <h4><i class="bi bi-info-circle me-2"></i>Problem Summary</h4>
+                                <p id="summary" class="mb-0"></p>
+                            </div>
+                            
+                            <div class="response-item">
+                                <h4><i class="bi bi-lightbulb me-2"></i>Helpful Hints</h4>
+                                <ul id="hints" class="hints-list mb-0"></ul>
+                            </div>
+                            
+                            <div class="response-item">
+                                <h4><i class="bi bi-search me-2"></i>Code Review</h4>
+                                <p id="codeReview" class="mb-0"></p>
+                            </div>
+                            
+                            <div class="response-item">
+                                <h4><i class="bi bi-bug me-2"></i>Edge Test Cases</h4>
+                                <ul id="testCases" class="test-cases-list mb-0"></ul>
+                            </div>
+                        </div>
+                        
+                        <!-- Error Message -->
+                        <div id="errorMessage" class="alert alert-danger" style="display: none;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Prevent default form submission and handle with JavaScript
+        document.getElementById('analysisForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // Get form elements
+            const submitBtn = document.getElementById('submitBtn');
+            const loading = document.getElementById('loading');
+            const responseSection = document.getElementById('responseSection');
+            const errorMessage = document.getElementById('errorMessage');
+            
+            // Get input values
+            const problemTitle = document.getElementById('problemTitle').value.trim();
+            const userCode = document.getElementById('userCode').value.trim();
+            
+            // Validate inputs
+            if (!problemTitle || !userCode) {
+                showError('Please fill in both the problem title and your code.');
+                return;
+            }
+            
+            // Show loading state
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Analyzing...';
+            loading.style.display = 'block';
+            responseSection.style.display = 'none';
+            errorMessage.style.display = 'none';
+            
+            try {
+                // Send fetch request to /analyze endpoint
+                const response = await fetch('/analyze', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        problem_title: problemTitle,
+                        user_code: userCode
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    // Render the returned JSON into formatted display
+                    displayResults(data);
+                } else {
+                    showError(data.error || 'An error occurred while analyzing your code.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showError('Network error. Please check your connection and try again.');
+            } finally {
+                // Reset button state
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="bi bi-robot me-2"></i>Analyze Code';
+                loading.style.display = 'none';
+            }
+        });
+        
+        function displayResults(data) {
+            // Display problem summary
+            const summaryElement = document.getElementById('summary');
+            summaryElement.textContent = data.summary || 'No summary available.';
+            
+            // Display hints with proper formatting
+            const hintsList = document.getElementById('hints');
+            hintsList.innerHTML = '';
+            if (data.hints && Array.isArray(data.hints)) {
+                data.hints.forEach((hint, index) => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `<strong>Hint ${index + 1}:</strong> ${hint}`;
+                    hintsList.appendChild(li);
+                });
+            }
+            
+            // Display code review
+            const codeReviewElement = document.getElementById('codeReview');
+            codeReviewElement.textContent = data.code_review || 'No code review available.';
+            
+            // Display test cases with proper formatting
+            const testCasesList = document.getElementById('testCases');
+            testCasesList.innerHTML = '';
+            if (data.test_cases && Array.isArray(data.test_cases)) {
+                data.test_cases.forEach((testCase, index) => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `<strong>Test Case ${index + 1}:</strong> ${testCase}`;
+                    testCasesList.appendChild(li);
+                });
+            }
+            
+            // Show results section
+            responseSection.style.display = 'block';
+            
+            // Smooth scroll to results
+            responseSection.scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'start' 
+            });
+        }
+        
+        function showError(message) {
+            const errorMessage = document.getElementById('errorMessage');
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+            
+            // Scroll to error message
+            errorMessage.scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'center' 
+            });
+        }
+    </script>
+</body>
+</html> 

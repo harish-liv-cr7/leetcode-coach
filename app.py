@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 from dotenv import load_dotenv
 import openai
 import os
@@ -11,6 +11,11 @@ load_dotenv()
 openai.api_key = os.getenv('OPENAI_API_KEY')
 
 app = Flask(__name__)
+
+@app.route('/')
+def index():
+    """Serve the main HTML page."""
+    return render_template('index.html')
 
 @app.route('/analyze', methods=['POST'])
 def analyze_problem():
